@@ -82,7 +82,10 @@ module Validations=
   /// validate :: e -> (a -> Bool) -> a -> AccValidation e a
   /// @
   let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
-
+  //validationNel :: Either e a -> AccValidation (NonEmpty e) a
+  /// | 'validationNel' is 'liftError' specialised to 'NonEmpty' lists, since
+  /// they are a common semigroup to use.
+  let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (liftResult result) x
   /// | @v 'orElse' a@ returns @a@ when @v@ is AccFailure, and the @a@ in @AccSuccess a@.
   ///
   /// This can be thought of as having the less general type:
@@ -92,8 +95,20 @@ module Validations=
   /// @
   let inline orElse v a = 
       match v with
-      | AccFailure _ -> a
-      | AccSuccess x -> x
+      |AccFailure _ -> a
+      |AccSuccess x -> x
+  /// | Return the @a@ or run the given function over the @e@.
+  ///
+  /// This can be thought of as having the less general type:
+  ///
+  /// @
+  /// valueOr :: (e -> a) -> AccValidation e a -> a
+  /// @
+  //valueOr :: Validate v => (e -> a) -> v e a -> a
+  let valueOr ea v = 
+    match v with
+    |AccFailure e -> ea e
+    |AccSuccess a -> a
 
   /// | 'ensure' leaves the validation unchanged when the predicate holds, or
   /// fails with @e@ otherwise.
