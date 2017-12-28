@@ -51,10 +51,18 @@ module AccValidation=
       | (AccSuccess a) -> AccSuccess (map g a)
       | (AccFailure e) -> AccFailure (map f e)
 
+  /// | @bindValidation@ binds through an AccValidation, which is useful for
+  /// composing AccValidations sequentially. Note that despite having a bind
+  /// function of the correct type, AccValidation is not a monad.
+  /// The reason is, this bind does not accumulate errors, so it does not
+  /// agree with the Applicative instance.
+  ///
+  /// There is nothing wrong with using this function, it just does not make a
+  /// valid @Monad@ instance.
   let inline bind (f:'T->AccValidation<_,_>) x :AccValidation<_,_>=
       match x with 
       | AccFailure e -> AccFailure e
-      | AccSuccess a -> (f a) 
+      | AccSuccess a -> f a
 
 
 
