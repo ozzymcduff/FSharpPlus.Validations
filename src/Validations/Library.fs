@@ -60,7 +60,10 @@ module AccValidation=
 
 type AccValidation<'err,'a> with
 
+  // as Applicative
+  static member Return            x = AccSuccess x
   static member inline (<*>)      (e1':AccValidation<'Monoid,_>, e2':AccValidation<'Monoid,_>) : AccValidation<'Monoid,_> = AccValidation.apply e1' e2'
+  // as Functor
   static member inline Map        (x : AccValidation<_,_>, f) = AccValidation.map f x
   static member inline Bind       (x, f)     = AccValidation.bind f x
  
