@@ -14,6 +14,8 @@ open FSharpPlus.Compatibility.Haskell
 ///
 /// An example of typical usage can be found <https://github.com/qfpl/validation/blob/master/examples/src/Email.hs here>.
 ///
+//[<StructuralEquality>]
+//[<StructuralComparison>]
 type AccValidation<'err,'a> =
   | AccFailure of 'err
   | AccSuccess of 'a
