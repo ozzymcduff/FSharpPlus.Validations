@@ -83,7 +83,6 @@ let testValidateTrue ()=
 
 [<Fact>]
 let testValidateFalse ()=
-  let subject = validate three (const' true) seven
+  let subject = validate three (const' false) seven
   let expected = AccFailure three
   Assert.Equal(expected, subject)
-
