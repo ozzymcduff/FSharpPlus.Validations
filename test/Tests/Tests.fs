@@ -40,53 +40,52 @@ let testValidationNel() =
   let subject  = validation length (const' 0) $ validationNel (Left ())
   subject |> should equal 1
 *)
+[<Fact>]
 let testEnsureLeftFalse () =
-  let //subject :: v Int Int
-      subject = ensure three (const' false) (AccFailure seven)
+  let subject = ensure three (const' false) (AccFailure seven)
   subject |> should equal (AccFailure  seven)
 
+[<Fact>]
 let testEnsureLeftTrue () =
-  let //subject :: v Int Int
-      subject = ensure three (const' true) (AccFailure seven)
+  let subject = ensure three (const' true) (AccFailure seven)
   subject |> should equal (AccFailure  seven)
 
+[<Fact>]
 let testEnsureRightFalse () =
-  let //subject :: v Int Int
-      subject = ensure three (const' false) (AccSuccess seven)
+  let subject = ensure three (const' false) (AccSuccess seven)
   subject |> should equal (AccFailure  three)
 
+[<Fact>]
 let testEnsureRightTrue () =
-  let //subject :: v Int Int
-      subject = ensure three (const' true ) (AccSuccess seven)
+  let subject = ensure three (const' true ) (AccSuccess seven)
   subject |> should equal (AccSuccess seven)
 
+[<Fact>]
 let testOrElseRight () =
-  let //v :: v Int Int
-      v = AccSuccess  seven
+  let v = AccSuccess  seven
   let subject = orElse v three
   subject |> should equal seven
-//  in  TestCase (assertEqual "orElseRight" subject seven)
 
+[<Fact>]
 let testOrElseLeft () =
-  let //v :: v Int Int
-      v = AccFailure seven
+  let v = AccFailure seven
   let subject = orElse v three
-  in  TestCase (assertEqual "orElseLeft" subject three)
+  subject |> should equal three
 
 //testEnsureLeftFalse, testEnsureLeftTrue, testEnsureRightFalse, testEnsureRightTrue,
 //  testOrElseRight, testOrElseLeft
 //  :: forall v. (Validate v, Eq (v Int Int), Show (v Int Int)) => Proxy v -> Test
 
 
-//testValidateTrue :: Test
+[<Fact>]
 let testValidateTrue ()=
-  let subject = validate three (const True) seven
-      expected = AccSuccess seven
-  in  TestCase (assertEqual "testValidateTrue" subject expected)
+  let subject = validate three (const' true) seven
+  let expected = AccSuccess seven
+  subject |> should equal expected
 
-//testValidateFalse :: Test
+[<Fact>]
 let testValidateFalse ()=
-  let subject = validate three (const True) seven
-      expected = AccFailure three
-  in  TestCase (assertEqual "testValidateFalse" subject expected)
+  let subject = validate three (const' true) seven
+  let expected = AccFailure three
+  subject |> should equal expected
 
