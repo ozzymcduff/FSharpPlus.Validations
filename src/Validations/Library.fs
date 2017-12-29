@@ -36,8 +36,8 @@ module AccValidation=
       | (AccFailure _) -> x
 
   let inline traverse f = function 
-    | (AccSuccess a) -> AccSuccess (map f a)
-    | (AccFailure e) -> AccSuccess (AccFailure e)
+    | (AccSuccess a) -> map AccSuccess (f a)
+    | (AccFailure e) -> AccFailure e
 
   let inline bimap f g = function
     | (AccFailure e) -> AccFailure (f e)
@@ -64,36 +64,6 @@ module AccValidation=
       | AccFailure e -> AccFailure e
       | AccSuccess a -> f a
 
-
-
-type AccValidation<'err,'a> with
-
-  // as Applicative
-  static member Return            x = AccSuccess x
-  static member inline (<*>)      (e1':AccValidation<'Monoid,_>, e2':AccValidation<'Monoid,_>) : AccValidation<'Monoid,_> = AccValidation.apply e1' e2'
-  // as Functor
-  static member inline Map        (x : AccValidation<_,_>, f) = AccValidation.map f x
-  static member inline Bind       (x, f)     = AccValidation.bind f x
- 
-
-module Validations=
-  let liftResult (f:('b -> 'e)) : (Result<'a,'b>->AccValidation<'e,'a>) = function | Error e-> AccFailure (f e) | Ok a-> AccSuccess a
-  /// | 'liftError' is useful for converting an 'Either' to an 'AccValidation'
-  /// when the @Left@ of the 'Either' needs to be lifted into a 'Semigroup'.
-  let liftChoice (f:('b -> 'e)) : (Either<'b,'a>->AccValidation<'e,'a>) = either (AccFailure << f) AccSuccess
-
-  /// | 'validate's the @a@ with the given predicate, returning @e@ if the predicate does not hold.
-  ///
-  /// This can be thought of as having the less general type:
-  ///
-  /// @
-  /// validate :: e -> (a -> Bool) -> a -> AccValidation e a
-  /// @
-  let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
-  //validationNel :: Either e a -> AccValidation (NonEmpty e) a
-  /// | 'validationNel' is 'liftError' specialised to 'NonEmpty' lists, since
-  /// they are a common semigroup to use.
-  let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (liftResult result) x
   /// | @v 'orElse' a@ returns @a@ when @v@ is AccFailure, and the @a@ in @AccSuccess a@.
   ///
   /// This can be thought of as having the less general type:
@@ -117,6 +87,47 @@ module Validations=
     match v with
     |AccFailure e -> ea e
     |AccSuccess a -> a
+  let liftResult (f:('b -> 'e)) : (Result<'a,'b>->AccValidation<'e,'a>) = function | Error e-> AccFailure (f e) | Ok a-> AccSuccess a
+  /// | 'liftError' is useful for converting an 'Either' to an 'AccValidation'
+  /// when the @Left@ of the 'Either' needs to be lifted into a 'Semigroup'.
+  let liftChoice (f:('b -> 'e)) : (Either<'b,'a>->AccValidation<'e,'a>) = either (AccFailure << f) AccSuccess
+
+  let inline alt a x=
+      match a,x with 
+      | AccFailure _, x' -> x'
+      | AccSuccess a', _ -> AccSuccess a'
+
+type AccValidation<'err,'a> with
+
+  // as Applicative
+  static member Return            x = AccSuccess x
+  static member inline (<*>)      (e1':AccValidation<'Monoid,_>, e2':AccValidation<'Monoid,_>) : AccValidation<'Monoid,_> = AccValidation.apply e1' e2'
+  // as Functor
+  static member inline Map        (x : AccValidation<_,_>, f) = AccValidation.map f x
+  static member inline Bind       (x, f)     = AccValidation.bind f x
+  // bimap
+  static member Bimap (x:AccValidation<'T,'V>, f:'T->'U, g:'V->'W) :AccValidation<'U,'W> = AccValidation.bimap f g x
+  // 
+  static member inline get_Empty () = AccFailure ( getEmpty() )
+  //static member Append 
+  static member inline Append (x:AccValidation<_,_>, y:AccValidation<_,_>) = AccValidation.alt x y
+  static member inline Traverse (t:AccValidation<_,'T>, f : 'T->AccValidation<_,'U>) : AccValidation<_,_>=AccValidation.traverse f t
+
+module Validations=
+
+  /// | 'validate's the @a@ with the given predicate, returning @e@ if the predicate does not hold.
+  ///
+  /// This can be thought of as having the less general type:
+  ///
+  /// @
+  /// validate :: e -> (a -> Bool) -> a -> AccValidation e a
+  /// @
+  let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
+  //validationNel :: Either e a -> AccValidation (NonEmpty e) a
+  /// | 'validationNel' is 'liftError' specialised to 'NonEmpty' lists, since
+  /// they are a common semigroup to use.
+  let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
+
 
   /// | 'ensure' leaves the validation unchanged when the predicate holds, or
   /// fails with @e@ otherwise.

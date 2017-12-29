@@ -35,8 +35,8 @@ let testNN() =
 (*
 [<Fact>]
 let testValidationNel() =
-  let subject  = validation length (const' 0) $ validationNel (Left ())
-  subject |> should equal 1
+  let subject  = validation length (const' 0) $ validationNel (Error ())
+  Assert.Equal(1, subject)
 *)
 [<Fact>]
 let testEnsureLeftFalse () =
@@ -61,13 +61,13 @@ let testEnsureRightTrue () =
 [<Fact>]
 let testOrElseRight () =
   let v = AccSuccess  seven
-  let subject = orElse v three
+  let subject = AccValidation.orElse v three
   Assert.Equal(seven, subject)
 
 [<Fact>]
 let testOrElseLeft () =
   let v = AccFailure seven
-  let subject = orElse v three
+  let subject = AccValidation.orElse v three
   Assert.Equal(three, subject)
 
 //testEnsureLeftFalse, testEnsureLeftTrue, testEnsureRightFalse, testEnsureRightTrue,
