@@ -40,14 +40,16 @@ module FunctorP=
   [<Property>]
   let ``map id  =  id ``(x :AccValidation<string list, int>) =
     (AccValidation.map id) x =  id x
-  
+
   [<Property>]
   let ``map (f << g) = map f << map g ``(x :AccValidation<string list, int>) (f:string->int) (g:int->string)=
     (AccValidation.map (f << g)) x = (AccValidation.map f << AccValidation.map g) x
+  
+
 module BifunctorP=  
   [<Property>]
   let ``bimap f g = first f << second g``(x :AccValidation<string, int>) (f:string->int) (g:int->string)=
-    (AccValidation.bimap f g) x = (first f << second g) x
+    (bimap f g) x = (first f << second g) x
 module AlternativeP=  
   [<Property>]
   let ``empty <|> x = x``(x :AccValidation<string list, int>) =

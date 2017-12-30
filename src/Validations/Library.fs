@@ -27,7 +27,7 @@ module AccValidation=
       | AccSuccess a -> AccSuccess (f a) 
   let inline apply e1' e2' = 
     match e1',e2' with
-    | AccFailure e1, AccFailure e2 -> AccFailure (plus e1 e2)
+    | AccFailure e1, AccFailure e2 -> AccFailure (plus e1 e2) // Plus.Invoke x y
     | AccFailure e1, AccSuccess _  -> AccFailure e1
     | AccSuccess _, AccFailure e2 -> AccFailure e2
     | AccSuccess f, AccSuccess a -> AccSuccess (f a)
@@ -101,17 +101,19 @@ type AccValidation<'err,'a> with
 
   // as Applicative
   static member Return            x = AccSuccess x
-  static member inline (<*>)      (e1':AccValidation<'Monoid,_>, e2':AccValidation<'Monoid,_>) : AccValidation<'Monoid,_> = AccValidation.apply e1' e2'
+
+  static member inline (<*>)      (f:AccValidation<_,'T->'U>, x:AccValidation<_,'T>) : AccValidation<_,_> = 
+        AccValidation.apply f x
   // as Functor
-  static member inline Map        (x : AccValidation<_,_>, f) = AccValidation.map f x
-  static member inline Bind       (x, f)     = AccValidation.bind f x
+  static member Map        (x : AccValidation<_,_>, f) = AccValidation.map f x
+  static member Bind       (x, f)     = AccValidation.bind f x
   // bimap
   static member Bimap (x:AccValidation<'T,'V>, f:'T->'U, g:'V->'W) :AccValidation<'U,'W> = AccValidation.bimap f g x
   // 
   static member inline get_Empty () = AccFailure ( getEmpty() )
   //static member Append 
-  static member inline Append (x:AccValidation<_,_>, y:AccValidation<_,_>) = AccValidation.alt x y
-  static member inline Traverse (t:AccValidation<_,'T>, f : 'T->AccValidation<_,'U>) : AccValidation<_,_>=AccValidation.traverse f t
+  static member Append (x:AccValidation<_,_>, y:AccValidation<_,_>) = AccValidation.alt x y
+  static member Traverse (t:AccValidation<_,'T>, f : 'T->AccValidation<_,'U>) : AccValidation<_,_>=AccValidation.traverse f t
 
 module Validations=
 

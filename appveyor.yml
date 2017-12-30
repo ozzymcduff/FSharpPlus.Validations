@@ -1,0 +1,16 @@
+
+version: 1.0.{build}
+configuration: Release
+before_build:
+  - dotnet restore
+build_script:
+  - dotnet build 
+test_script:
+  - dotnet test test/Tests
+nuget:
+  account_feed: false
+  project_feed: false
+  disable_publish_on_pr: true
+branches:
+  only:
+  - master
