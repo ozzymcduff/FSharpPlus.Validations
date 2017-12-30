@@ -92,10 +92,12 @@ module AccValidation=
   /// when the @Left@ of the 'Either' needs to be lifted into a 'Semigroup'.
   let liftChoice (f:('b -> 'e)) : (Either<'b,'a>->AccValidation<'e,'a>) = either (AccFailure << f) AccSuccess
 
-  let inline alt a x=
-      match a,x with 
-      | AccFailure _, x' -> x'
-      | AccSuccess a', _ -> AccSuccess a'
+  let appAccValidation (m:'err -> 'err -> 'err) (e1':AccValidation<'err,'a>) (e2':AccValidation<'err,'a>) =
+    match e1',e2' with
+    | (AccFailure e1), (AccFailure e2) ->AccFailure (m e1 e2)
+    | (AccFailure _), (AccSuccess a2)-> AccSuccess a2
+    | (AccSuccess a1), (AccFailure _)-> AccSuccess a1
+    | (AccSuccess a1), (AccSuccess _)-> AccSuccess a1
 
 type AccValidation<'err,'a> with
 
@@ -112,7 +114,7 @@ type AccValidation<'err,'a> with
   // 
   static member inline get_Empty () = AccFailure ( getEmpty() )
   //static member Append 
-  static member Append (x:AccValidation<_,_>, y:AccValidation<_,_>) = AccValidation.alt x y
+  static member inline Append (x:AccValidation<_,_>, y:AccValidation<_,_>) = AccValidation.appAccValidation FsControl.Append.Invoke x y
   static member Traverse (t:AccValidation<_,'T>, f : 'T->AccValidation<_,'U>) : AccValidation<_,_>=AccValidation.traverse f t
 
 module Validations=

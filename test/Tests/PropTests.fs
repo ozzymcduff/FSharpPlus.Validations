@@ -73,9 +73,11 @@ module AlternativeP=
   let ``(f <|> g) <*> x = (f <*> x) <|> (g <*> x)``(x :AccValidation<string list, int>) (y :AccValidation<string list, int>) (f:AccValidation<string list,int->string>) (g:AccValidation<string list,int->string>)=
     ((f <|> g) <*> x) = ((f <*> x) <|> (g <*> x))
 
-
-(*
-empty <*> f = empty
+(* // does not compile
+  [<Property>]
+  let ``empty <*> f = empty ``(f:AccValidation<string list,int->string>)=
+    let empty = AccValidation<string list,int>.get_Empty()
+    (empty <*> f )= empty
 *)
 
 
