@@ -24,11 +24,23 @@ let mkAssoc (f:AccValidation<string list, int> -> AccValidation<string list, int
   g assoc 
   //in  property $ join (liftA3 assoc g g g)
 
-//[<Fact>]
-//let prop_semigroup ()= mkAssoc (<>)
-//prop_semigroup = mkAssoc (<>)
 [<Fact>]
-let prop_monoid_assoc() = (mkAssoc plus).QuickCheck()
+let prop_semigroup ()= (mkAssoc (fun x y-> AccValidation<_,_>.Append(x,y))).QuickCheckThrowOnFailure()
+
+[<Fact>]
+let prop_monoid_assoc() = (mkAssoc plus).QuickCheckThrowOnFailure()
+[<Fact>]
+let prop_monoid_left_id() =
+  let g = Prop.forAll (Arb.fromGen( testGen))
+  let empty = getEmpty()
+  let check= fun x -> (plus empty x) = x
+  (g check).QuickCheckThrowOnFailure()
+[<Fact>]
+let prop_monoid_right_id ()=
+  let g = Prop.forAll (Arb.fromGen( testGen))
+  let empty = getEmpty()
+  let check= fun x -> (plus x empty) = x
+  (g check).QuickCheckThrowOnFailure()
 
 module FunctorP=
   [<Property>]
@@ -98,24 +110,15 @@ module AlternativeP=
     (empty <*> (AccSuccess f))=getEmpty()
 
 module TraversableP=
+(*
+  [<Property>]
+  let ``t << traverse f = traverse (t << f) ``(x :AccValidation<string list, int>) (t :int->string) (f:string->int)=
+    let right_side =((traverse (t << f) x))
+    let left_side =(t << traverse f x)
+    left_side = right_side
+*)
 //    t << traverse f = traverse (t << f) 
+
 //    traverse Identity = Identity
 //    traverse (Compose << fmap g . f) = Compose << fmap (traverse g) << traverse f
   let x=()
-
-(*
-
-
-prop_monoid_left_id :: Property
-prop_monoid_left_id =
-  property $ do
-    x <- forAll testGen
-    (mempty `mappend` x) === x
-
-prop_monoid_right_id :: Property
-prop_monoid_right_id =
-  property $ do
-    x <- forAll testGen
-    (x `mappend` mempty) === x
-
-*)
