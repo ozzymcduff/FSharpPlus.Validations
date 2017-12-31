@@ -94,14 +94,20 @@ module AlternativeP=
     (f <!> (x <|> y)) = ((f <!> x) <|> (f <!> y))
   
   //Right Distribution: does not hold
-  // [<Property()>]
+  //[<Property()>]
   let ``(f <|> g) <*> x = (f <*> x) <|> (g <*> x)``(x :AccValidation<string list, int>) (y :AccValidation<string list, int>) (f:AccValidation<string list,int->string>) (g:AccValidation<string list,int->string>)=
     ((f <|> g) <*> x) = ((f <*> x) <|> (g <*> x))
+  //[<Property()>]
+  let ``S1:(f <|> g) <*> x = (f <*> x) <|> (g <*> x)``(x :AccValidation<string list, int>) (y :AccValidation<string list, int>) (f:int->string) (g:int->string)=
+    let f' = AccSuccess f
+    let g' = AccSuccess g
+    ((f' <|> g') <*> x) = ((f' <*> x) <|> (g' <*> x))
 
-  // does not hold either:
-  // [<Property>]
-  let ``empty <*> f = empty ``(f:AccValidation<string list,int->string>)=
-    (getEmpty() <*> f)=getEmpty()
+  // holds when f is a function (success)
+  [<Property>]
+  let ``empty <*> f = empty ``(f:string->int)=
+    let empty:AccValidation<string list,_>=getEmpty()
+    (empty <*> (AccSuccess f))=getEmpty()
 
 module TraversableP=
 //    t << traverse f = traverse (t << f) 
