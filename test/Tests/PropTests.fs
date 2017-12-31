@@ -9,39 +9,6 @@ open Validations.Validations // not good
 open FsCheck
 open FsCheck.Xunit
 
-//let x y= Gen. y
-let genAccValidation (e:Gen<'e>) (a:Gen<'a>) : Gen<AccValidation<'e,'a>> = 
-  Gen.oneof [Gen.map AccFailure e; Gen.map AccSuccess a]
-
-let testGen : Gen<AccValidation<string list, int>> =
-  let strings = Gen.listOf Arb.generate<string>
-  genAccValidation strings Arb.generate<int>
-
-let mkAssoc (f:AccValidation<string list, int> -> AccValidation<string list, int> -> AccValidation<string list, int>) :Property=
-  let g = Prop.forAll (Arb.fromGen( testGen))
-  //  assoc = \x y z -> ((x `f` y) `f` z) === (x `f` (y `f` z))
-  let assoc = fun x y z -> (f (f x y) z) = (f x (f y z))
-  g assoc 
-  //in  property $ join (liftA3 assoc g g g)
-
-[<Fact>]
-let prop_semigroup ()= (mkAssoc (fun x y-> AccValidation<_,_>.Append(x,y))).QuickCheckThrowOnFailure()
-
-[<Fact>]
-let prop_monoid_assoc() = (mkAssoc plus).QuickCheckThrowOnFailure()
-[<Fact>]
-let prop_monoid_left_id() =
-  let g = Prop.forAll (Arb.fromGen( testGen))
-  let empty = getEmpty()
-  let check= fun x -> (plus empty x) = x
-  (g check).QuickCheckThrowOnFailure()
-[<Fact>]
-let prop_monoid_right_id ()=
-  let g = Prop.forAll (Arb.fromGen( testGen))
-  let empty = getEmpty()
-  let check= fun x -> (plus x empty) = x
-  (g check).QuickCheckThrowOnFailure()
-
 module FunctorP=
   [<Property>]
   let ``map id  =  id ``(x :AccValidation<string list, int>) =
@@ -55,6 +22,7 @@ module BifunctorP=
   [<Property>]
   let ``bimap f g = first f << second g``(x :AccValidation<string, int>) (f:string->int) (g:int->string)=
     (bimap f g) x = (first f << second g) x
+
 module ApplicativeP=  
   ///The identity law
   [<Property>]
