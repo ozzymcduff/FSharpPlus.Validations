@@ -58,23 +58,11 @@ module ApplicativeP=
     y=(result f <*> result x) 
   /// Interchange
   /// in haskell: u <*> pure y = pure ($ y) <*> u
-  (*
   [<Property>] 
-  let ``u <*> result y = result ((<|) y) <*> u``(u:AccValidation<string list, string->int> ) (y:string->string) =
-    let right_side =(result (((<|) y)) <*> u)
+  let ``u <*> result y = result ((|>) y) <*> u``(u:AccValidation<string list, string->int> ) (y:string) =
+    let right_side =result ((|>) y) <*> u
     let left_side = u <*> (result y)
     right_side=left_side
-    //let res= AccValidation.apply u (AccSuccess ((<|) y))  
-    //(AccValidation.apply (AccSuccess y) u ) =res
-*)
-(*
-    let inline apply (OptionT f : OptionT<'``Monad<option<('T -> 'U)>``>) (OptionT x : OptionT<'``Monad<option<'T>``>) = OptionT (map Option.apply f <*> x)  : OptionT<'``Monad<option<'U>``>
-  [<Property>] 
-  let ``u <*> result y = result ((<|) y) <*> u``(u ) (y) =
-    //let res= AccValidation.apply u (result ((<|) y))  
-    //(AccValidation.apply (result y) u ) =res
-    false
-*)
 
 module AlternativeP=  
   [<Property>]
