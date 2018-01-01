@@ -8,6 +8,7 @@ open Validations
 open Validations.Validations // not good
 open FsCheck
 open FsCheck.Xunit
+open FSharpPlus.Data
 
 module FunctorP=
   [<Property>]
@@ -65,11 +66,6 @@ module AlternativeP=
   //[<Property()>]
   let ``(f <|> g) <*> x = (f <*> x) <|> (g <*> x)``(x :AccValidation<string list, int>) (y :AccValidation<string list, int>) (f:AccValidation<string list,int->string>) (g:AccValidation<string list,int->string>)=
     ((f <|> g) <*> x) = ((f <*> x) <|> (g <*> x))
-  //[<Property()>]
-  let ``S1:(f <|> g) <*> x = (f <*> x) <|> (g <*> x)``(x :AccValidation<string list, int>) (y :AccValidation<string list, int>) (f:int->string) (g:int->string)=
-    let f' = AccSuccess f
-    let g' = AccSuccess g
-    ((f' <|> g') <*> x) = ((f' <*> x) <|> (g' <*> x))
 
   // holds when f is a function (success)
   [<Property>]
@@ -78,6 +74,17 @@ module AlternativeP=
     (empty <*> (AccSuccess f))=getEmpty()
 
 module TraversableP=
+
+  //let y_1 =traverse (fun x -> [0..x]) (AccFailure [1])
+(*
+  [<Property>]
+  let ``Result: t << traverse f = traverse (t << f) ``
+    (x :Result<string list,string> ) (t :int->string list) (f:string list->int)=
+    let t_f = (t << f)
+    let right_side = x |> (Result.traverse (t << f))
+    let left_side = x |> (t << Result.traverse f ) 
+    left_side = right_side
+*)
 (*
   [<Property>]
   let ``t << traverse f = traverse (t << f) ``(x :AccValidation<string list, int>) (t :int->string) (f:string->int)=
@@ -85,8 +92,13 @@ module TraversableP=
     let left_side =(t << traverse f x)
     left_side = right_side
 *)
-//    t << traverse f = traverse (t << f) 
-
-//    traverse Identity = Identity
-//    traverse (Compose << fmap g . f) = Compose << fmap (traverse g) << traverse f
-  let x=()
+  [<Property>]
+  let ``traverse Identity = Identity``(x :AccValidation<int list, string>)=
+    AccValidation.traverse (Identity) x = Identity x
+(*
+  [<Property>]
+  let ``traverse (Compose << fmap g . f) = Compose << fmap (traverse g) << traverse f``(x :AccValidation<int list, string>) (g :int list->string) (f:string->int list)=
+    let y_1 = traverse (Compose << map (g << f))
+    let y_2 = Compose << map (traverse g) << traverse f
+    y_1 x= y_2 x
+*)

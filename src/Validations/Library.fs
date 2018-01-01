@@ -18,35 +18,34 @@ type AccValidation<'err,'a> =
   | AccSuccess of 'a
 
 module AccValidation=
-  let inline map (f:'T->'U) x=
-      match x with 
-      | AccFailure e -> AccFailure e
-      | AccSuccess a -> AccSuccess (f a) 
+  let inline map (f:'T->'U)=function
+    |AccFailure e -> AccFailure e
+    |AccSuccess a -> AccSuccess (f a) 
   let inline apply e1' e2' = 
     match e1',e2' with
-    | AccFailure e1, AccFailure e2 -> AccFailure (plus e1 e2)
-    | AccFailure e1, AccSuccess _  -> AccFailure e1
-    | AccSuccess _, AccFailure e2 -> AccFailure e2
-    | AccSuccess f, AccSuccess a -> AccSuccess (f a)
+    |AccFailure e1, AccFailure e2 -> AccFailure (plus e1 e2)
+    |AccFailure e1, AccSuccess _  -> AccFailure e1
+    |AccSuccess _, AccFailure e2 -> AccFailure e2
+    |AccSuccess f, AccSuccess a -> AccSuccess (f a)
   let inline foldr f x = function 
-      | (AccSuccess a) -> f a x
-      | (AccFailure _) -> x
+    |AccSuccess a -> f a x
+    |AccFailure _ -> x
 
   let inline traverse f = function 
-    | (AccSuccess a) -> map AccSuccess (f a)
-    | (AccFailure e) -> AccFailure e
+    |AccSuccess a -> AccSuccess <!> f a
+    |AccFailure e -> result (AccFailure e)
 
   let inline bimap f g = function
-    | (AccFailure e) -> AccFailure (f e)
-    | (AccSuccess a) -> AccSuccess (g a)
+    |AccFailure e -> AccFailure (f e)
+    |AccSuccess a -> AccSuccess (g a)
 
   let inline bifoldr f g x = function 
-      |(AccSuccess a) -> g a x
-      |(AccFailure e) -> f e x
+    |AccSuccess a -> g a x
+    |AccFailure e -> f e x
 
   let inline bitraverse f g = function 
-      | (AccSuccess a) -> AccSuccess (map g a)
-      | (AccFailure e) -> AccFailure (map f e)
+    | AccSuccess a -> AccSuccess <!> g a
+    | AccFailure e -> AccFailure <!> f e
 
   /// 'bind' binds through an AccValidation, which is useful for
   /// composing AccValidations sequentially. Note that despite having a bind
@@ -80,10 +79,10 @@ module AccValidation=
 
   let appAccValidation (m:'err -> 'err -> 'err) (e1':AccValidation<'err,'a>) (e2':AccValidation<'err,'a>) =
     match e1',e2' with
-    | (AccFailure e1), (AccFailure e2) ->AccFailure (m e1 e2)
-    | (AccFailure _), (AccSuccess a2)-> AccSuccess a2
-    | (AccSuccess a1), (AccFailure _)-> AccSuccess a1
-    | (AccSuccess a1), (AccSuccess _)-> AccSuccess a1
+    |AccFailure e1 , AccFailure e2 -> AccFailure (m e1 e2)
+    |AccFailure _  , AccSuccess a2 -> AccSuccess a2
+    |AccSuccess a1 , AccFailure _  -> AccSuccess a1
+    |AccSuccess a1 , AccSuccess _  -> AccSuccess a1
 
 type AccValidation<'err,'a> with
 
@@ -99,9 +98,8 @@ type AccValidation<'err,'a> with
   static member Map        (x : AccValidation<_,_>, f) = AccValidation.map f x
   // as Bifunctor
   static member Bimap (x:AccValidation<'T,'V>, f:'T->'U, g:'V->'W) :AccValidation<'U,'W> = AccValidation.bimap f g x
-  // Monoid?
   // as Traversable
-  static member Traverse (t:AccValidation<_,'T>, f : 'T->AccValidation<_,'U>) : AccValidation<_,_>=AccValidation.traverse f t
+  static member inline Traverse (t:AccValidation<'err,'a>, f : 'a->'b) : 'c=AccValidation.traverse f t
 
 module Validations=
 
