@@ -4,8 +4,7 @@ open System
 open Xunit
 open FSharpPlus
 open FSharpPlus.Compatibility.Haskell
-open Validations
-open Validations.Validations // not good
+open FSharpPlus.Validations
 
 //( # ) :: AReview t b -> b -> t
 let seven = 7

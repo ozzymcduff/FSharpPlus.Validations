@@ -4,8 +4,7 @@ open System
 open Xunit
 open FSharpPlus
 //open FSharpPlus.Compatibility.Haskell
-open Validations
-open Validations.Validations // not good
+open FSharpPlus.Validations
 open FsCheck
 open FsCheck.Xunit
 open FSharpPlus.Data

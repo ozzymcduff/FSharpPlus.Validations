@@ -1,4 +1,4 @@
-namespace Validations
+module FSharpPlus.Validations
 
 open FSharpPlus
 open FSharpPlus.Lens
@@ -101,31 +101,30 @@ type AccValidation<'err,'a> with
   // as Traversable
   static member inline Traverse (t:AccValidation<'err,'a>, f : 'a->'b) : 'c=AccValidation.traverse f t
 
-module Validations=
 
-  /// | 'validate's the @a@ with the given predicate, returning @e@ if the predicate does not hold.
-  ///
-  /// This can be thought of as having the less general type:
-  ///
-  /// @
-  /// validate :: e -> (a -> Bool) -> a -> AccValidation e a
-  /// @
-  let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
-  //validationNel :: Either e a -> AccValidation (NonEmpty e) a
-  /// | 'validationNel' is 'liftError' specialised to 'NonEmpty' lists, since
-  /// they are a common semigroup to use.
-  let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
+/// | 'validate's the @a@ with the given predicate, returning @e@ if the predicate does not hold.
+///
+/// This can be thought of as having the less general type:
+///
+/// @
+/// validate :: e -> (a -> Bool) -> a -> AccValidation e a
+/// @
+let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
+//validationNel :: Either e a -> AccValidation (NonEmpty e) a
+/// | 'validationNel' is 'liftError' specialised to 'NonEmpty' lists, since
+/// they are a common semigroup to use.
+let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
 
 
-  /// | 'ensure' leaves the validation unchanged when the predicate holds, or
-  /// fails with @e@ otherwise.
-  ///
-  /// This can be thought of as having the less general type:
-  ///
-  /// @
-  /// ensure :: e -> (a -> Bool) -> AccValidation e a -> AccValidation e a
-  /// @
-  let inline ensure (e:'e) (p:'a-> bool) =
-    function
-    |AccFailure x -> AccFailure x
-    |AccSuccess a -> validate e p a
+/// | 'ensure' leaves the validation unchanged when the predicate holds, or
+/// fails with @e@ otherwise.
+///
+/// This can be thought of as having the less general type:
+///
+/// @
+/// ensure :: e -> (a -> Bool) -> AccValidation e a -> AccValidation e a
+/// @
+let inline ensure (e:'e) (p:'a-> bool) =
+  function
+  |AccFailure x -> AccFailure x
+  |AccSuccess a -> validate e p a

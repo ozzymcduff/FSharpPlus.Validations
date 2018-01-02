@@ -1,7 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition=" '$(VersionSuffix)' == '' ">$(VersionPrefix)</Version>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <Authors>wallymathieu;gusty</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/wallymathieu/FSharpPlus.Validations</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
