@@ -17,6 +17,6 @@
     <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Validations\Validations.fsproj" />
+    <ProjectReference Include="..\..\src\FSharpPlus.Validations\FSharpPlus.Validations.fsproj" />
   </ItemGroup>
 </Project>

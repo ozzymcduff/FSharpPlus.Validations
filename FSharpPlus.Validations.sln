@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED67D9A5-F6CF-4E04-9A33-83BE1D6D4CAD}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Validations", "src\Validations\Validations.fsproj", "{347FE116-922D-4A99-A37A-C02F7DC985F7}"
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "FSharpPlus.Validations", "src\FSharpPlus.Validations\FSharpPlus.Validations.fsproj", "{347FE116-922D-4A99-A37A-C02F7DC985F7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2F46E9FC-9A73-40D4-BDD0-D67C5F745F94}"
 EndProject
