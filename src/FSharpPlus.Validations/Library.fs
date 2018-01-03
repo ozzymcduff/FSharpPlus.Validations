@@ -2,13 +2,12 @@ module FSharpPlus.Validations
 
 open FSharpPlus
 open FSharpPlus.Lens
-open FSharpPlus.Compatibility.Haskell
 
-/// An 'AccValidation' is either a value of the type 'err or 'a, similar to 'Either'. However,
+/// An 'AccValidation' is either a value of the type 'err or 'a, similar to 'Result'. However,
 /// the 'Applicative' instance for 'AccValidation' /accumulates/ errors using a 'Semigroup' on 'err.
-/// In contrast, the Applicative for 'Either returns only the first error.
+/// In contrast, the Applicative for 'Result returns only the first error.
 ///
-/// A consequence of this is that 'AccValidation' is not a monad. There is no f#+ 'Bind' method since
+/// A consequence of this is that 'AccValidation' is not a monad. There is no F#+ 'Bind' method since
 /// that would violate monad rules.
 ///
 /// An example of typical usage can be found <https://github.com/qfpl/validation/blob/master/examples/src/Email.hs here>.
@@ -75,7 +74,7 @@ module AccValidation=
   let liftResult (f:('b -> 'e)) : (Result<'a,'b>->AccValidation<'e,'a>) = function | Error e-> AccFailure (f e) | Ok a-> AccSuccess a
   /// 'liftEither' is useful for converting an 'Either' to an 'AccValidation'
   /// when the 'Left' of the 'Either' needs to be lifted into a 'Semigroup'.
-  let liftEither (f:('b -> 'e)) : (Either<'b,'a>->AccValidation<'e,'a>) = either (AccFailure << f) AccSuccess
+  let liftChoice (f:('b -> 'e)) : (Choice<'a,'b>->AccValidation<'e,'a>) = Choice.either (AccFailure << f) AccSuccess
 
   let appAccValidation (m:'err -> 'err -> 'err) (e1':AccValidation<'err,'a>) (e2':AccValidation<'err,'a>) =
     match e1',e2' with
@@ -102,28 +101,26 @@ type AccValidation<'err,'a> with
   static member inline Traverse (t:AccValidation<'err,'a>, f : 'a->'b) : 'c=AccValidation.traverse f t
 
 
-/// | 'validate's the @a@ with the given predicate, returning @e@ if the predicate does not hold.
+/// Validate's the [a] with the given predicate, returning [e] if the predicate does not hold.
 ///
 /// This can be thought of as having the less general type:
 ///
-/// @
-/// validate :: e -> (a -> Bool) -> a -> AccValidation e a
-/// @
+/// validate : 'e -> ('a -> bool) -> 'a -> AccValidation<'e, 'a>
+///
 let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
-//validationNel :: Either e a -> AccValidation (NonEmpty e) a
-/// | 'validationNel' is 'liftError' specialised to 'NonEmpty' lists, since
+
+//validationNel : Choice<'a,'e> -> AccValidation (NonEmpty e) a
+/// This is 'liftError' specialized to 'NonEmpty' lists, since
 /// they are a common semigroup to use.
 let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
 
 
-/// | 'ensure' leaves the validation unchanged when the predicate holds, or
-/// fails with @e@ otherwise.
+/// Leaves the validation unchanged when the predicate holds, or
+/// fails with [e] otherwise.
 ///
 /// This can be thought of as having the less general type:
 ///
-/// @
-/// ensure :: e -> (a -> Bool) -> AccValidation e a -> AccValidation e a
-/// @
+/// ensure : 'e -> ('a -> 'bool) -> AccValidation<'a,'e> -> AccValidation<'a,'e>
 let inline ensure (e:'e) (p:'a-> bool) =
   function
   |AccFailure x -> AccFailure x
