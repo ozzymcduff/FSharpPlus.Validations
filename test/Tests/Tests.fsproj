@@ -4,6 +4,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Samples_Email.fs" />
+    <Compile Include="Samples_Person.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="PropTests.fs" />
     <Compile Include="Program.fs" />

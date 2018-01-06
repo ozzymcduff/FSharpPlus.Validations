@@ -114,7 +114,6 @@ let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then
 /// they are a common semigroup to use.
 let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
 
-
 /// Leaves the validation unchanged when the predicate holds, or
 /// fails with [e] otherwise.
 ///
@@ -125,3 +124,6 @@ let inline ensure (e:'e) (p:'a-> bool) =
   function
   |AccFailure x -> AccFailure x
   |AccSuccess a -> validate e p a
+
+let inline _Success s=AccSuccess s
+let inline _Failure s=AccFailure s
