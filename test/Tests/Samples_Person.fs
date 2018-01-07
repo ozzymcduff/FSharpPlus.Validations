@@ -29,21 +29,21 @@ type Error =
 let mkName s = 
   let l = length s
   in if (l >= 1 && l <= 50)
-    then _Success <| Name.create s
-    else _Failure  [ NameBetween1And50 ]
+    then AccSuccess <| Name.create s
+    else AccFailure  [ NameBetween1And50 ]
 
 
 //mkEmail :: String -> AccValidation [Error] Email
 let mkEmail s = 
   if String.contains '@' s
-    then _Success <| Email.create s
-    else _Failure [ EmailMustContainAtChar ]
+    then AccSuccess <| Email.create s
+    else AccFailure [ EmailMustContainAtChar ]
 
 //mkAge :: Int -> AccValidation [Error] Age
 let mkAge a = 
   if (a >= 0 && a <= 120)
-    then _Success <| Age.create a
-    else _Failure [ AgeBetween0and120 ]
+    then AccSuccess <| Age.create a
+    else AccFailure [ AgeBetween0and120 ]
 
 //mkPerson :: String -> String -> Int -> AccValidation [Error] Person
 let mkPerson pName pEmail pAge =
@@ -56,25 +56,27 @@ let mkPerson pName pEmail pAge =
 //-- Data constructors for `Name`, `Age`, `Email`, and `Person` should not be 
 //-- exported to the example code below:
 
-//validPerson :: AccValidation [Error] Person
 let validPerson = mkPerson "Bob" "bob@gmail.com" 25
-//-- AccSuccess (Person {name = Name {unName = "Bob"}, email = Email {unEmail = "bob@gmail.com"}, age = Age {unAge = 25}})
+[<Fact>]
+let ``validPerson ``() = Assert.Equal(AccSuccess ({name = {unName = "Bob"}; email = {unEmail = "bob@gmail.com"}; age = {unAge = 25}}), validPerson)
 
-//badName :: AccValidation [Error] Person
 let badName = mkPerson "" "bob@gmail.com" 25
-//-- AccFailure [NameBetween1And50]
+[<Fact>]
+let ``badName ``() = Assert.Equal(AccFailure [NameBetween1And50], badName)
 
-//badEmail :: AccValidation [Error] Person
 let badEmail = mkPerson "Bob" "bademail" 25
-//-- AccFailure [EmailMustContainAtChar]
+[<Fact>]
+let ``badEmail ``() = Assert.Equal(AccFailure [EmailMustContainAtChar], badEmail)
 
-//badAge :: AccValidation [Error] Person
 let badAge = mkPerson "Bob" "bob@gmail.com" 150
-//-- AccFailure [AgeBetween0and120]
+[<Fact>]
+let ``badAge ``() = Assert.Equal(AccFailure [AgeBetween0and120], badAge)
 
-//badEverything :: AccValidation [Error] Person
 let badEverything = mkPerson "" "bademail" 150
-//-- AccFailure [NameBetween1And50,EmailMustContainAtChar,AgeBetween0and120]
+[<Fact>]
+let ``badEverything ``() = Assert.Equal(AccFailure [NameBetween1And50;EmailMustContainAtChar;AgeBetween0and120], badEverything)
+
+open FSharpPlus.Lens
 
 //asMaybeGood :: Maybe Person
 //let asMaybeGood = validPerson ^? _Success

@@ -20,22 +20,22 @@ type VError = | MustNotBeEmpty
 //-- String must contain an '@' character
 //atString :: String -> AccValidation [VError] AtString
 let atString (x:string) : AccValidation<VError list,AtString> =
-  if String.contains '@' x then _Success <| AtString x
-  else _Failure [MustContainAt]
+  if String.contains '@' x then AccSuccess <| AtString x
+  else AccFailure [MustContainAt]
 
 //-- String must contain an '.' character
 //periodString :: String -> AccValidation [VError] PeriodString
 let periodString (x:string) : AccValidation<VError list,PeriodString> = 
   if String.contains '.' x
-  then _Success <| PeriodString x
-  else _Failure [MustContainPeriod]
+  then AccSuccess <| PeriodString x
+  else AccFailure [MustContainPeriod]
 
 //-- String must not be empty
 //nonEmptyString :: String -> AccValidation [VError] NonEmptyString
 let nonEmptyString (x:string) : AccValidation<VError list,NonEmptyString> = 
   if not <| String.IsNullOrEmpty x 
-  then _Success <| NonEmptyString x
-  else _Failure [MustNotBeEmpty]
+  then AccSuccess <| NonEmptyString x
+  else AccFailure [MustNotBeEmpty]
 
 //-- ***** Combining smart constructors *****
 //email :: String -> AccValidation [VError] Email
