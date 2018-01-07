@@ -5,7 +5,7 @@ open FSharpPlus.Lens
 
 /// An 'AccValidation' is either a value of the type 'err or 'a, similar to 'Result'. However,
 /// the 'Applicative' instance for 'AccValidation' /accumulates/ errors using a 'Semigroup' on 'err.
-/// In contrast, the Applicative for 'Result returns only the first error.
+/// In contrast, the Applicative for 'Result' returns only the first error.
 ///
 /// A consequence of this is that 'AccValidation' is not a monad. There is no F#+ 'Bind' method since
 /// that would violate monad rules.
@@ -59,7 +59,7 @@ module AccValidation=
       | AccFailure e -> AccFailure e
       | AccSuccess a -> f a
 
-  ///  orElse v a returns 'a when v is AccFailure, and the a in AccSuccess a.
+  /// orElse v a returns 'a when v is AccFailure, and the a in AccSuccess a.
   let inline orElse v (a:'a) = 
       match v with
       |AccFailure _ -> a
@@ -72,8 +72,8 @@ module AccValidation=
   /// 'liftResult' is useful for converting a 'Result' to an 'AccValidation'
   /// when the 'Error' of the 'Result' needs to be lifted into a 'Semigroup'.
   let liftResult (f:('b -> 'e)) : (Result<'a,'b>->AccValidation<'e,'a>) = function | Error e-> AccFailure (f e) | Ok a-> AccSuccess a
-  /// 'liftEither' is useful for converting an 'Either' to an 'AccValidation'
-  /// when the 'Left' of the 'Either' needs to be lifted into a 'Semigroup'.
+  /// 'liftChoice' is useful for converting a 'Choice' to an 'AccValidation'
+  /// when the 'Choice2Of2' of the 'Choice' needs to be lifted into a 'Semigroup'.
   let liftChoice (f:('b -> 'e)) : (Choice<'a,'b>->AccValidation<'e,'a>) = Choice.either (AccFailure << f) AccSuccess
 
   let appAccValidation (m:'err -> 'err -> 'err) (e1':AccValidation<'err,'a>) (e2':AccValidation<'err,'a>) =
@@ -113,8 +113,8 @@ type AccValidation<'err,'a> with
 ///
 let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then AccSuccess a else AccFailure e
 
-//validationNel : Choice<'a,'e> -> AccValidation (NonEmpty e) a
-/// This is 'liftError' specialized to 'NonEmpty' lists, since
+/// validationNel : Choice<'a,'e> -> AccValidation (NonEmptyList<'e>) a
+/// This is 'liftError' specialized to 'NonEmptyList', since
 /// they are a common semigroup to use.
 let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
 
