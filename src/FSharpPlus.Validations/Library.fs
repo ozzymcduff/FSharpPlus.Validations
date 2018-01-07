@@ -85,6 +85,7 @@ module AccValidation=
 
   let toResult x :Result<_,_> = match x with AccSuccess a -> Ok a | AccFailure e -> Error e
   let fromResult (x :Result<_,_>) = match x with Ok a -> AccSuccess a | Error e -> AccFailure e
+  let inline either f g         = function AccSuccess v      -> f v      | AccFailure e                 -> g e
 
 type AccValidation<'err,'a> with
 
@@ -127,6 +128,10 @@ let inline ensure (e:'e) (p:'a-> bool) =
   function
   |AccFailure x -> AccFailure x
   |AccSuccess a -> validate e p a
+
+
+let inline _Success    x = (prism AccSuccess    <| AccValidation.either Ok (Error << AccFailure)) x
+let inline _Failure    x = (prism AccFailure <| AccValidation.either (Error << AccFailure) Ok ) x
 
 let inline isoAccValidationResult x = x |> iso AccValidation.toResult AccValidation.fromResult
 

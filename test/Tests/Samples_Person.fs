@@ -77,19 +77,18 @@ let badEverything = mkPerson "" "bademail" 150
 let ``badEverything ``() = Assert.Equal(AccFailure [NameBetween1And50;EmailMustContainAtChar;AgeBetween0and120], badEverything)
 
 open FSharpPlus.Lens
+let asMaybeGood = validPerson ^? _Success
+[<Fact>]
+let ``asMaybeGood ``() = Assert.Equal(Some ({name = {unName = "Bob"}; email = {unEmail = "bob@gmail.com"}; age = {unAge = 25}}), asMaybeGood)
+let asMaybeBad = badEverything ^? _Success
+[<Fact>]
+let ``asMaybeBad ``() = Assert.Equal(None, asMaybeBad)
 
-//asMaybeGood :: Maybe Person
-//let asMaybeGood = validPerson ^? _Success
-//-- Just (Person {name = Name {unName = "Bob"}, email = Email {unEmail = "bob@gmail.com"}, age = Age {unAge = 25}})
+let asResultGood = validPerson ^. isoAccValidationResult
+[<Fact>]
+let ``asResultGood ``() = Assert.Equal(Ok ({name = {unName = "Bob"}; email = {unEmail = "bob@gmail.com"}; age = {unAge = 25}}), asResultGood)
 
-//asMaybeBad :: Maybe Person
-//let asMaybeBad = badEverything ^? _Success
-//-- Nothing
+let asResultBad = badEverything ^. isoAccValidationResult
+[<Fact>]
+let ``asResultBad ``() = Assert.Equal(Error [NameBetween1And50;EmailMustContainAtChar;AgeBetween0and120], asResultBad)
 
-//asEitherGood :: Either [Error] Person
-//let asEitherGood = validPerson ^. _Either
-//-- Right (Person {name = Name {unName = "Bob"}, email = Email {unEmail = "bob@gmail.com"}, age = Age {unAge = 25}})
-
-//asEitherBad :: Either [Error] Person
-//let asEitherBad = badEverything ^. _Either
-//-- Left [NameBetween1And50,EmailMustContainAtChar,AgeBetween0and120]
