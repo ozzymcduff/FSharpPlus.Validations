@@ -5,7 +5,6 @@ open FSharpPlus.Validations
 open FSharpPlus.Operators
 open Xunit
 
-
 type Name = { unName : String } 
 with static member create s={unName=s}
 type Email = { unEmail : String } 
@@ -24,37 +23,30 @@ type Error =
            | EmailMustContainAtChar
            | AgeBetween0and120
 
-// -- Smart constructors
-// mkName :: String -> AccValidation [Error] Name
+// Smart constructors
 let mkName s = 
   let l = length s
   in if (l >= 1 && l <= 50)
     then AccSuccess <| Name.create s
     else AccFailure  [ NameBetween1And50 ]
 
-
-//mkEmail :: String -> AccValidation [Error] Email
 let mkEmail s = 
   if String.contains '@' s
     then AccSuccess <| Email.create s
     else AccFailure [ EmailMustContainAtChar ]
 
-//mkAge :: Int -> AccValidation [Error] Age
 let mkAge a = 
   if (a >= 0 && a <= 120)
     then AccSuccess <| Age.create a
     else AccFailure [ AgeBetween0and120 ]
 
-//mkPerson :: String -> String -> Int -> AccValidation [Error] Person
 let mkPerson pName pEmail pAge =
   Person.create
   <!> (mkName pName)
   <*> (mkEmail pEmail)
   <*> (mkAge pAge)
 
-//-- Examples
-//-- Data constructors for `Name`, `Age`, `Email`, and `Person` should not be 
-//-- exported to the example code below:
+// Examples
 
 let validPerson = mkPerson "Bob" "bob@gmail.com" 25
 [<Fact>]
