@@ -83,6 +83,10 @@ module AccValidation=
     |AccSuccess a1 , AccFailure _  -> AccSuccess a1
     |AccSuccess a1 , AccSuccess _  -> AccSuccess a1
 
+  let toResult x :Result<_,_> = match x with AccSuccess a -> Ok a | AccFailure e -> Error e
+  let fromResult (x :Result<_,_>) = match x with Ok a -> AccSuccess a | Error e -> AccFailure e
+  let inline either f g         = function AccSuccess v      -> f v      | AccFailure e                 -> g e
+
 type AccValidation<'err,'a> with
 
   // as Applicative
@@ -114,7 +118,6 @@ let validate (e:'e) (p:('a -> bool)) (a:'a) : AccValidation<'e,'a> = if p a then
 /// they are a common semigroup to use.
 let validationNel (x:Result<_,_>) : (AccValidation<NonEmptyList<'e>,'a>)= (AccValidation.liftResult result) x
 
-
 /// Leaves the validation unchanged when the predicate holds, or
 /// fails with [e] otherwise.
 ///
@@ -125,3 +128,10 @@ let inline ensure (e:'e) (p:'a-> bool) =
   function
   |AccFailure x -> AccFailure x
   |AccSuccess a -> validate e p a
+
+
+let inline _Success    x = (prism AccSuccess    <| AccValidation.either Ok (Error << AccFailure)) x
+let inline _Failure    x = (prism AccFailure <| AccValidation.either (Error << AccFailure) Ok ) x
+
+let inline isoAccValidationResult x = x |> iso AccValidation.toResult AccValidation.fromResult
+
